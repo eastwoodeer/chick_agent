@@ -6,6 +6,8 @@ from collections.abc import Iterator
 
 from openai import OpenAI
 
+from chick_agent.core.exceptions import LLMException
+
 SUPPORTED_PROVIDERS = Literal[
     "openai",
     "deepseek",
@@ -96,12 +98,14 @@ class ChickAgentLLM:
                 stream=True,
             )
             for chunk in response:
+                if (not chunk.choices) or len(chunk.choices) == 0:
+                    break
                 content = chunk.choices[0].delta.content or ""
                 if content:
                     yield content
             print()
         except Exception as e:
-            print(f"think exception: {e}")
+            raise LLMException(f"调用 {self.model} 模型失败: {e}")
 
     def invoke(self, messages: list[dict[str, str]], **kwargs) -> str:
         try:
@@ -118,7 +122,7 @@ class ChickAgentLLM:
             )
             return response.choices[0].message.content
         except Exception as e:
-            print(f"think exception: {e}")
+            raise LLMException(f"调用 {self.model} 模型失败: {e}")
 
 
 if __name__ == "__main__":

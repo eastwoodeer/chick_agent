@@ -45,8 +45,12 @@ class SimpleAgent(Agent):
 
 
 if __name__ == "__main__":
-    llm = ChickAgentLLM(model="deepseek-chat", provider="deepseek")
+    import httpx
+
+    # llm = ChickAgentLLM(model="deepseek-chat", provider="deepseek")
+    llm = ChickAgentLLM(client=httpx.Client(trust_env=False))
     agent = SimpleAgent("AI助手", llm, "你是一名有用的AI助手，请用中文回答我的问题")
     for chunk in agent.stream_run("你好，介绍一下你自己"):
         print(chunk, end="", flush=True)
+    # print(agent.run("你好，介绍一下你自己"))
     print(agent.get_history())
