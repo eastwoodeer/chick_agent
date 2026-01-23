@@ -16,9 +16,11 @@ class Tool(ABC):
         self.name = name
         self.description = description
 
+    @abstractmethod
     def run(self, parameters: dict[str, object]) -> str:
         pass
 
+    @abstractmethod
     def get_parameters(self) -> list[ToolParameter]:
         pass
 

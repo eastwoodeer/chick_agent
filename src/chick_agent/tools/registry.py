@@ -1,4 +1,5 @@
 from chick_agent.tools.tool import Tool
+from chick_agent.tools.mcp_tool import MCPTool
 
 
 class ToolRegistry:
@@ -13,5 +14,12 @@ class ToolRegistry:
                 if expanded_tools:
                     for t in expanded_tools:
                         self._tools[t.name] = t
+                        print(t.to_dict())
                     print(f"{tool.name} 展开为: {len(expanded_tools)} 个工具")
                     return
+
+    def get_tool_descriptions(self) -> str:
+        descriptions = []
+        for tool in self._tools.values():
+            descriptions.append(f"- {tool.name}: {tool.description}")
+        return "\n".join(descriptions) if descriptions else "无可用工具"
