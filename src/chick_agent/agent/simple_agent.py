@@ -26,7 +26,6 @@ class SimpleAgent(Agent):
     def run(self, input_text: str, max_tool_iterations: int = 3, **kwargs) -> str:
         messages = []
         enhanced_prompt = self._get_system_tool_prompt()
-        print(enhanced_prompt)
         messages.append({"role": "system", "content": enhanced_prompt})
 
         for msg in self._history:
@@ -46,7 +45,6 @@ class SimpleAgent(Agent):
         while current_iteration < max_tool_iterations:
             current_iteration += 1
             response = self.llm.invoke(messages, **kwargs)
-            print(f"{current_iteration}: {response}")
             tool_calls = self._parse_tool_calls(response)
             if tool_calls:
                 tool_results = []
@@ -79,7 +77,6 @@ class SimpleAgent(Agent):
     def _execute_tool_call(self, tool_name: str, tool_parameters: str) -> str:
         try:
             tool = self.tool_registry.get_tool(tool_name)
-            print(tool.get_parameters())
             if not tool:
                 return f"错误: 未找到工具 {tool_name}"
             params = self._parse_tool_parameters(tool_name, tool_parameters)

@@ -123,13 +123,11 @@ class MCPTool(Tool):
         try:
 
             async def run_mcp_tool():
-                print("run_mcp_tool")
                 if self.server:
                     client_source = self.server
                 else:
                     client_source = self.server_command
 
-                print(client_source)
                 async with MCPClient(
                     client_source, self.server_args, env=self.env
                 ) as client:

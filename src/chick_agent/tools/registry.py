@@ -14,7 +14,6 @@ class ToolRegistry:
                 if expanded_tools:
                     for t in expanded_tools:
                         self._tools[t.name] = t
-                        print(t.to_dict())
                     print(f"{tool.name} 展开为: {len(expanded_tools)} 个工具")
                     return
 

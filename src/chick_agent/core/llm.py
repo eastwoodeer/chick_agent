@@ -6,7 +6,7 @@ from collections.abc import Iterator
 
 from openai import OpenAI
 
-from chick_agent.core.exceptions import LLMException
+from chick_agent.core.exceptions import ChickAgentException, LLMException
 
 SUPPORTED_PROVIDERS = Literal[
     "openai",
@@ -41,7 +41,7 @@ class ChickAgentLLM:
         if not self.model:
             self.model = self._get_default_model()
         if not all([self.api_key, self.base_url]):
-            print("Unkonwn api_key or base_url...")
+            raise ChickAgentException("未找到合适的api_key或api地址")
             return
         self._client = self._create_client(http_client)
 
