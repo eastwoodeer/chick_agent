@@ -116,7 +116,6 @@ class MCPTool(Tool):
 
     @override
     def run(self, parameters: dict[str, object]) -> str:
-        print("dododo")
         action = parameters.get("action", "").lower()
 
         if not action:
@@ -124,13 +123,11 @@ class MCPTool(Tool):
         try:
 
             async def run_mcp_tool():
-                print("run_mcp_tool")
                 if self.server:
                     client_source = self.server
                 else:
                     client_source = self.server_command
 
-                print(client_source)
                 async with MCPClient(
                     client_source, self.server_args, env=self.env
                 ) as client:
@@ -169,7 +166,6 @@ class MCPTool(Tool):
                     future = executor.submit(run_in_thread)
                     return future.result()
             except RuntimeError:
-                print("runtimeerror....")
                 return asyncio.run(run_mcp_tool())
 
         except Exception as e:

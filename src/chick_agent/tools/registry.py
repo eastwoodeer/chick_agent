@@ -14,7 +14,6 @@ class ToolRegistry:
                 if expanded_tools:
                     for t in expanded_tools:
                         self._tools[t.name] = t
-                        print(t.to_dict())
                     print(f"{tool.name} 展开为: {len(expanded_tools)} 个工具")
                     return
 
@@ -23,3 +22,6 @@ class ToolRegistry:
         for tool in self._tools.values():
             descriptions.append(f"- {tool.name}: {tool.description}")
         return "\n".join(descriptions) if descriptions else "无可用工具"
+
+    def get_tool(self, name: str) -> Tool | None:
+        return self._tools.get(name)
