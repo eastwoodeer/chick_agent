@@ -35,7 +35,9 @@ class ChickAgentLLM:
         self.timeout = timeout or int(os.getenv("LLM_TIMEOUT", "60"))
         self.kwargs = kwargs
 
-        self.provider = (provider or "").lower() if provider else None
+        self.provider = (
+            (provider or os.getenv("LLM_PROVIDER", "")).lower() if provider else None
+        )
         self.api_key, self.base_url = self._resolve_credentials(api_key, base_url)
 
         if not self.model:
@@ -86,7 +88,8 @@ class ChickAgentLLM:
     def think(
         self, messages: list[dict[str, str]], temperature: float | None = None
     ) -> Iterator[str]:
-        print(f"调用 {self.model} 模型")
+        is_thinking_start = False
+        is_answering_start = False
         try:
             response = self._client.chat.completions.create(
                 model=self.model,
@@ -100,14 +103,27 @@ class ChickAgentLLM:
             for chunk in response:
                 if (not chunk.choices) or len(chunk.choices) == 0:
                     break
-                content = chunk.choices[0].delta.content or ""
-                if content:
-                    yield content
+                delta = chunk.choices[0].delta
+                if hasattr(delta, "reasoning_content"):
+                    reasoning_content = delta.reasoning_content
+                    if reasoning_content:
+                        if not is_thinking_start:
+                            yield "\n思考中...\n"
+                            is_thinking_start = True
+                        yield reasoning_content
+                if hasattr(delta, "content"):
+                    content = delta.content or ""
+                    if content:
+                        if not is_answering_start:
+                            yield "\n\n开始回答:\n"
+                            is_answering_start = True
+                        yield content
             print()
         except Exception as e:
             raise LLMException(f"调用 {self.model} 模型失败: {e}")
 
     def invoke(self, messages: list[dict[str, str]], **kwargs) -> str:
+        full_response = ""
         try:
             response = self._client.chat.completions.create(
                 model=self.model,
@@ -120,7 +136,13 @@ class ChickAgentLLM:
                     if k not in ["temperature", "max_tokens"]
                 },
             )
-            return response.choices[0].message.content
+            message = response.choices[0].message
+            if hasattr(message, "reasoning_content") and message.reasoning_content:
+                full_response = (
+                    f"\n思考中...\n{message.reasoning_content}\n\n开始回答:\n"
+                )
+            full_response = f"{full_response}{response.choices[0].message.content}"
+            return full_response
         except Exception as e:
             raise LLMException(f"调用 {self.model} 模型失败: {e}")
 
