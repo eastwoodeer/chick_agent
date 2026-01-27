@@ -108,14 +108,14 @@ class ChickAgentLLM:
                     reasoning_content = delta.reasoning_content
                     if reasoning_content:
                         if not is_thinking_start:
-                            yield "\n思考中...\n"
+                            yield "思考中...\n"
                             is_thinking_start = True
                         yield reasoning_content
                 if hasattr(delta, "content"):
                     content = delta.content or ""
                     if content:
-                        if not is_answering_start:
-                            yield "\n\n开始回答:\n"
+                        if not is_answering_start and is_thinking_start:
+                            yield f"\n\n{'=' * 20}\n"
                             is_answering_start = True
                         yield content
             print()
@@ -139,7 +139,7 @@ class ChickAgentLLM:
             message = response.choices[0].message
             if hasattr(message, "reasoning_content") and message.reasoning_content:
                 full_response = (
-                    f"\n思考中...\n{message.reasoning_content}\n\n开始回答:\n"
+                    f"思考中...\n{message.reasoning_content}\n\n{'=' * 20}\n"
                 )
             full_response = f"{full_response}{response.choices[0].message.content}"
             return full_response

@@ -10,7 +10,7 @@ def repr():
     import httpx
 
     agent = SimpleAgent(
-        name="AI助手",
+        name="🤖",
         llm=ChickAgentLLM(client=httpx.Client(trust_env=False)),
         system_prompt="你是一名有用的AI助手",
     )
@@ -20,7 +20,7 @@ def repr():
         try:
             user_input = session.prompt("🙈: ").strip()
 
-            if user_input.lower() in ["exit", "quit", "q", "x"]:
+            if user_input.lower() in ["exit", "quit", "bye", "q", "x"]:
                 print("退出")
                 break
             if not user_input:
