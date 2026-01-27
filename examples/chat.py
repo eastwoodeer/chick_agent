@@ -1,5 +1,9 @@
 from chick_agent.agent import SimpleAgent
 from chick_agent.core import ChickAgentLLM
+from chick_agent.tools import MCPTool
+
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
 
 
 def repr():
@@ -10,18 +14,19 @@ def repr():
         llm=ChickAgentLLM(client=httpx.Client(trust_env=False)),
         system_prompt="你是一名有用的AI助手",
     )
+    session = PromptSession(history=FileHistory("/tmp/.chat.history"))
 
     while True:
         try:
-            user_input = input("🙈: ").strip()
+            user_input = session.prompt("🙈: ").strip()
 
-            if user_input.lower() in ["exit", "quit"]:
+            if user_input.lower() in ["exit", "quit", "q", "x"]:
                 print("退出")
                 break
             if not user_input:
                 continue
-            response = agent.run(user_input)
-            print(f"{agent.name}: {response}")
+            print(f"{agent.name}: ", end="", flush=True)
+            agent.run(user_input, stream=True)
         except KeyboardInterrupt:
             print("\n退出")
             break

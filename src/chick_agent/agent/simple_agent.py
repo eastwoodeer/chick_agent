@@ -49,7 +49,26 @@ class SimpleAgent(Agent):
             self.tool_registry = tool_registry
         super().__init__(name, llm, system_prompt, config)
 
-    def run(self, input_text: str, max_tool_iterations: int = 3, **kwargs) -> str:
+    def _execute_llm(
+        self, messages: list[dict[str, str]], stream: bool = False, **kwargs
+    ) -> str:
+        response = ""
+        if stream:
+            for chunk in self.llm.think(messages, **kwargs):
+                print(chunk, end="", flush=True)
+                response += chunk
+        else:
+            response = self.llm.invoke(messages, **kwargs)
+            print(response)
+        return response
+
+    def run(
+        self,
+        input_text: str,
+        stream: bool = False,
+        max_tool_iterations: int = 3,
+        **kwargs,
+    ) -> str:
         messages = []
         enhanced_prompt = self._get_system_tool_prompt()
         messages.append({"role": "system", "content": enhanced_prompt})
@@ -60,7 +79,7 @@ class SimpleAgent(Agent):
         messages.append({"role": "user", "content": input_text})
 
         if not self.enable_tool_calling:
-            response = self.llm.invoke(messages, **kwargs)
+            response = self._execute_llm(messages, stream, **kwargs)
             self.add_message(Message(input_text, "user"))
             self.add_message(Message(response, "assistant"))
             return response
@@ -70,7 +89,7 @@ class SimpleAgent(Agent):
 
         while current_iteration < max_tool_iterations:
             current_iteration += 1
-            response = self.llm.invoke(messages, **kwargs)
+            response = self._execute_llm(messages, stream, **kwargs)
             tool_calls = self._parse_tool_calls(response)
             if tool_calls:
                 tool_results = []
@@ -94,7 +113,7 @@ class SimpleAgent(Agent):
             final_response = response
             break
         if current_iteration >= max_tool_iterations and not final_response:
-            final_response = self.llm.invoke(messages, **kwargs)
+            final_response = self._execute_llm(messages, stream, **kwargs)
 
         self.add_message(Message(input_text, "user"))
         self.add_message(Message(final_response, "assistant"))

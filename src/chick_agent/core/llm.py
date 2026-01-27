@@ -35,7 +35,9 @@ class ChickAgentLLM:
         self.timeout = timeout or int(os.getenv("LLM_TIMEOUT", "60"))
         self.kwargs = kwargs
 
-        self.provider = (provider or "").lower() if provider else None
+        self.provider = (
+            (provider or os.getenv("LLM_PROVIDER", "")).lower() if provider else None
+        )
         self.api_key, self.base_url = self._resolve_credentials(api_key, base_url)
 
         if not self.model:
@@ -86,7 +88,6 @@ class ChickAgentLLM:
     def think(
         self, messages: list[dict[str, str]], temperature: float | None = None
     ) -> Iterator[str]:
-        print(f"调用 {self.model} 模型")
         try:
             response = self._client.chat.completions.create(
                 model=self.model,
