@@ -25,3 +25,14 @@ build-backend = "uv_build"
 dev = [
     "prompt-toolkit>=3.0.52",
 ]
+
+[tool.basedpyright]
+extraPaths = ["src"]
+exclude = [
+    ".venv",
+    ".git",
+    "build",
+    "dist",
+    "**/*.c",
+    "**/*.so"
+]
